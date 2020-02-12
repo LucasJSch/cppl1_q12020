@@ -1,5 +1,5 @@
-#ifndef VECTOR3_H
-#define VECTOR3_H
+#ifndef ISOMETRY_H
+#define ISOMETRY_H
 
 #include <cstdint>
 #include <iostream>
@@ -75,4 +75,4 @@ class Vector3{
 }  // namespace math
 }  // namespace ekumen
 
-#endif  // VECTOR3_H
+#endif  // ISOMETRY_H
