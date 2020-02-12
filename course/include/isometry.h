@@ -76,6 +76,51 @@ class Vector3{
         double x_;
         double y_;
         double z_;
+        // Vector data in array-form, for more efficient implementation of [] operator
+        double* data_[3] = {&x_, &y_, &z_};
+};
+
+class Matrix3{
+    public:
+        // Constructors
+        Matrix3() : r1_(), r2_(), r3_() {};
+        Matrix3(Vector3& r1, Vector3& r2, Vector3& r3) : r1_(r1), r2_(r2), r3_(r3) {};
+        Matrix3(const Matrix3& m) : r1_(m.row(0)), r2_(v.y()), r3_(v.z()) {} ;
+
+        // Destructor
+        ~Matrix3() {}; // is this necessary?
+
+        // Operators
+        Vector3 operator [] (const index) const;
+        Matrix3 operator + (const Matrix3&) const;
+        Matrix3 operator - (const Matrix3&) const;
+        Matrix3 operator * (const Matrix3&) const;
+        Matrix3 operator / (const Matrix3&) const;
+        Matrix3 operator = (const Matrix3&);
+        Matrix3& operator += (const Matrix3&);
+        Matrix3& operator -= (const Matrix3&);
+        Matrix3& operator *= (const Matrix3&);
+        Matrix3& operator /= (const Matrix3&);
+
+        friend std::ostream& operator << (std::ostream& os, const Matrix3& m);
+
+        // Getters
+        Vector3 row(int index) const;
+        Vector3 col(int index) const;
+
+
+        // Computations
+        double det() const;
+
+        // Class constants
+        static const Matrix3 kIdentity;
+        static const Matrix3 kZero;
+        static const Matrix3 kOnes;
+
+    private:
+        // Ordered by rows.
+        double data[9];
+
 };
 
 }  // namespace math
