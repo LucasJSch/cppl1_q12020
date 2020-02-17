@@ -6,17 +6,31 @@ namespace ekumen {
 namespace math {
 
 double& Vector3::operator [] (const int index) const {
-    if(index > Vector3::MAX_INDEX) {
-        //throw error
+    if(index > Vector3::kMaxIndex) {
+        throw "Invalid index number";
     }
-    return *(data_[index]);
+    switch(index) {
+        case 0:
+            return x_;
+        case 1:
+            return y_;
+        case 2:
+            return z_;
+    }
 }
 
-double& Vector3::operator [] (const int index) {
-    if(index > Vector3::MAX_INDEX) {
-        //throw error
+const double& Vector3::operator [] (const int index) {
+    if(index > Vector3::kMaxIndex) {
+        throw "Invalid index number";
     }
-    return *(data_[index]);
+    switch(index) {
+        case 0:
+            return x_;
+        case 1:
+            return y_;
+        case 2:
+            return z_;
+    }
 }
 
 Vector3 Vector3::operator + (const Vector3& v) const {
@@ -75,17 +89,16 @@ bool ekumen::math::Vector3::operator == (const Vector3& v) const {
 }
 
 bool ekumen::math::Vector3::operator != (const Vector3& v) const {
-    // introduce tolerance
-    return (x_ != v.x_) || (y_ != v.y_) || (z_ != v.z_);
+    return !(*this == v);
 }
 
 bool ekumen::math::Vector3::operator == (const std::initializer_list<double>& list) const {
-    //check list correct size (3)
-    //check for loops that avoids SIGSEGV
-    std::initializer_list<double>::iterator it;
-    int i;
-    for(it = list.begin(), i = 0; it != list.end();) {
-         if(*it++ != (*this)[i++]) {
+    if(list.size() != 3) {
+        throw "Invalid initializer list size";
+    }
+    std::initializer_list<double>::iterator it = list.begin();
+    for (const double& d : v) {
+        if(*it++ != d) {
             return false;
         }
     }
@@ -93,16 +106,7 @@ bool ekumen::math::Vector3::operator == (const std::initializer_list<double>& li
 }
 
 bool ekumen::math::Vector3::operator != (const std::initializer_list<double>& list) const {
-    //check list correct size (3)
-    //check for loops that avoids SIGSEGV
-    std::initializer_list<double>::iterator it;
-    int i;
-    for(it = list.begin(), i = 0; it != list.end();) {
-         if(*it++ != (*this)[i++]) {
-            return true;
-        }
-    }
-    return false;
+    return !(*this == list);
 }
 
 // Computations
