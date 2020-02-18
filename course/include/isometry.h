@@ -75,31 +75,41 @@ class Vector3{
 class Matrix3{
     public:
         // Constructors
-        Matrix3() : r1_(), r2_(), r3_() {};
-        Matrix3(Vector3& r1, Vector3& r2, Vector3& r3) : r1_(r1), r2_(r2), r3_(r3) {};
-        Matrix3(const Matrix3& m) : r1_(m.row(0)), r2_(v.y()), r3_(v.z()) {} ;
-
-        // Destructor
-        ~Matrix3() {}; // is this necessary?
+        Matrix3(const Vector3& r1 = Vector3(), 
+                const Vector3& r2 = Vector3(), const Vector3& r3 = Vector3())
+                 : r1_{r1}, r2_{r2}, r3_{r3} {};
+        Matrix3(const Matrix3& m) : Matrix3(m.row(0), m.row(1), m.row(2)) {};
+        Matrix3(const std::initializer_list<double>& list);
 
         // Operators
-        Vector3 operator [] (const index) const;
+        const Vector3 operator [] (const int index) const;
         Matrix3 operator + (const Matrix3&) const;
         Matrix3 operator - (const Matrix3&) const;
         Matrix3 operator * (const Matrix3&) const;
+        Matrix3 operator * (const double) const;
         Matrix3 operator / (const Matrix3&) const;
-        Matrix3 operator = (const Matrix3&);
+        Matrix3& operator = (const Matrix3&);
         Matrix3& operator += (const Matrix3&);
         Matrix3& operator -= (const Matrix3&);
         Matrix3& operator *= (const Matrix3&);
         Matrix3& operator /= (const Matrix3&);
+        bool operator == (const Matrix3&);
 
-        friend std::ostream& operator << (std::ostream& os, const Matrix3& m);
+        friend Matrix3 operator * (const double d, const Matrix3& m) {
+                return Matrix3(m.r1_ * d, m.r2_ * d, m.r3_ * d);
+        }
+
+        friend std::ostream& operator << (std::ostream& os, const Matrix3& m) {
+        os << std::string("[");
+        for(int i = 0; i < 3; i++) {
+            os << m.row(i);
+        }
+        return os;
+        }
 
         // Getters
         Vector3 row(int index) const;
         Vector3 col(int index) const;
-
 
         // Computations
         double det() const;
@@ -111,7 +121,7 @@ class Matrix3{
 
     private:
         // Ordered by rows.
-        double data[9];
+        Vector3 r1_, r2_, r3_;
 
 };
 
