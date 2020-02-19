@@ -14,7 +14,7 @@ class Vector3{
         Vector3(double x = 0, double y = 0, double z = 0) : x_{x}, y_{y}, z_{z} {};
         Vector3(const Vector3& v) : Vector3(v.x_, v.y_, v.z_) {};
         Vector3(const std::initializer_list<double>& l) {
-            if(l.size() > 3) {
+            if(l.size() != 3) {
                 throw "Invalid initializer list size";
             }
             std::initializer_list<double>::iterator it = l.begin();
@@ -76,8 +76,6 @@ class Vector3{
         double x_;
         double y_;
         double z_;
-        // Vector data in array-form, for more efficient implementation of [] operator
-        double* data_[3] = {&x_, &y_, &z_};
 };
 
 class Matrix3{
@@ -88,9 +86,13 @@ class Matrix3{
                  : r1_{r1}, r2_{r2}, r3_{r3} {};
         Matrix3(const Matrix3& m) : Matrix3(m.row(0), m.row(1), m.row(2)) {};
         Matrix3(const std::initializer_list<double>& list);
+        Matrix3(const std::initializer_list<double>&,
+                const std::initializer_list<double>&,
+                const std::initializer_list<double>&);
 
         // Operators
-        const Vector3 operator [] (const int index) const;
+        Vector3& operator [] (const int);
+        const Vector3& operator [] (const int) const;
         Matrix3 operator + (const Matrix3&) const;
         Matrix3 operator - (const Matrix3&) const;
         Matrix3 operator * (const Matrix3&) const;
@@ -102,22 +104,22 @@ class Matrix3{
         Matrix3& operator *= (const Matrix3&);
         Matrix3& operator /= (const Matrix3&);
         bool operator == (const Matrix3&);
+        bool operator != (const Matrix3&);
 
         friend Matrix3 operator * (const double d, const Matrix3& m) {
                 return Matrix3(m.r1_ * d, m.r2_ * d, m.r3_ * d);
         }
 
         friend std::ostream& operator << (std::ostream& os, const Matrix3& m) {
-        os << std::string("[");
-        for(int i = 0; i < 3; i++) {
-            os << m.row(i);
-        }
+        os << std::string("[") << m.row(0) << std::string(", ") << m.row(1) << 
+        std::string(", ") << m.row(2) << std::string("]");
         return os;
         }
 
         // Getters
-        Vector3 row(int index) const;
-        Vector3 col(int index) const;
+        Vector3& row(int index);
+        const Vector3& row(int index) const;
+        const Vector3 col(int index) const;
 
         // Computations
         double det() const;

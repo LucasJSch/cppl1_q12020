@@ -131,22 +131,39 @@ const Vector3 Vector3::kUnitZ = Vector3(0,0,1);
 const Vector3 Vector3::kZero = Vector3(0,0,0);
 
 
+
+
+
+
 // Matrix3 class methods
 
 // Constructors
 Matrix3::Matrix3(const std::initializer_list<double>& list) {
-    //check list size
-    //implement
+    if(list.size() != 9) {
+        throw "Invalid initializer list size";
+    }
+    std::initializer_list<double>::iterator it = list.begin();
+    r1_ = Vector3(std::initializer_list<double>{*it++, *it++, *it++});
+    r2_ = Vector3(std::initializer_list<double>{*it++, *it++, *it++});
+    r3_ = Vector3(std::initializer_list<double>{*it++, *it++, *it});
 }
 
+Matrix3::Matrix3(const std::initializer_list<double>& l1,
+                 const std::initializer_list<double>& l2,
+                 const std::initializer_list<double>& l3) {
+    r1_ = Vector3(l1);
+    r2_ = Vector3(l2);
+    r3_ = Vector3(l3);
+}
 
 // Operators
-const Vector3 Matrix3::operator [] (const int index) const {
-    // check correct index value
-    return Vector3(this->row(index));
+Vector3& Matrix3::operator [] (const int index) {
+    return this->row(index);
 }
 
-//check for returning matrix reference instead of new matrix
+const Vector3& Matrix3::operator [] (const int index) const {
+    return this->row(index);
+}
 
 Matrix3 Matrix3::operator + (const Matrix3& m) const {
     return Matrix3(r1_ + m.r1_, r2_ + m.r2_, r3_ + m.r3_);
@@ -210,8 +227,12 @@ bool Matrix3::operator == (const Matrix3& m) {
     return false;
 }
 
+bool Matrix3::operator != (const Matrix3& m) {
+    return !(*this == m);
+}
+
 // Getters
-Vector3 Matrix3::row(int index) const {
+Vector3& Matrix3::row(int index) {
     switch(index) {
         case 0:
             return r1_;
@@ -224,24 +245,43 @@ Vector3 Matrix3::row(int index) const {
     }
 }
 
-Vector3 Matrix3::col(int index) const {
-    if(index > 2) {
+const Vector3& Matrix3::row(int index) const {
+    switch(index) {
+        case 0:
+            return r1_;
+        case 1:
+            return r2_;
+        case 2:
+            return r3_;
+        default:
+            throw "Error. Invalid row index for Matrix3";
+    }
+}
+
+const Vector3 Matrix3::col(int index) const {
+    if (index > 2) {
         throw "Error. Invalid column index for Matrix3";
     }
     return Vector3(r1_[index], r2_[index], r3_[index]);
 }
 
 // Computations
-//double Matrix3::det() const;
+double Matrix3::det() const {
+    double subdet1 =  r1_[0] * (r2_[1] * r3_[2] - r2_[2] * r3_[1]);
+    double subdet2 = -r1_[1] * (r2_[0] * r3_[2] - r2_[2] * r3_[0]);
+    double subdet3 =  r1_[2] * (r2_[0] * r3_[1] - r2_[1] * r3_[0]);
+
+    return subdet1 + subdet2 + subdet3;
+}
 
 // Class constants
 const Matrix3 Matrix3::kIdentity = 
-    Matrix3(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,1)); //check line style guide
+    Matrix3(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,1));
 
 const Matrix3 Matrix3::kZero = Matrix3();
 
 const Matrix3 Matrix3::kOnes = 
-    Matrix3(Vector3(1,1,1), Vector3(1,1,1), Vector3(1,1,1));  //check line style guide
+    Matrix3(Vector3(1,1,1), Vector3(1,1,1), Vector3(1,1,1));
 
 
 }  // namespace math
