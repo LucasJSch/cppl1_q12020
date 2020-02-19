@@ -5,8 +5,8 @@
 namespace ekumen {
 namespace math {
 
-double& Vector3::operator [] (const int index) const {
-    if(index > Vector3::kMaxIndex) {
+const double& Vector3::operator [] (const int index) const {
+    if(index > 2) {
         throw "Invalid index number";
     }
     switch(index) {
@@ -19,8 +19,8 @@ double& Vector3::operator [] (const int index) const {
     }
 }
 
-const double& Vector3::operator [] (const int index) {
-    if(index > Vector3::kMaxIndex) {
+double& Vector3::operator [] (const int index) {
+    if(index > 2) {
         throw "Invalid index number";
     }
     switch(index) {
@@ -43,6 +43,10 @@ Vector3 Vector3::operator - (const Vector3& v) const {
 
 Vector3 Vector3::operator * (const Vector3& v) const {
     return Vector3(x_ * v.x_, y_ * v.y_, z_ * v.z_);
+}
+
+Vector3 Vector3::operator * (const double& d) const {
+    return Vector3(x_ * d, y_ * d, z_ * d);
 }
 
 Vector3 Vector3::operator / (const Vector3&v) const {
@@ -96,13 +100,8 @@ bool ekumen::math::Vector3::operator == (const std::initializer_list<double>& li
     if(list.size() != 3) {
         throw "Invalid initializer list size";
     }
-    std::initializer_list<double>::iterator it = list.begin();
-    for (const double& d : v) {
-        if(*it++ != d) {
-            return false;
-        }
-    }
-    return true;
+
+    return (*this) == Vector3(list);
 }
 
 bool ekumen::math::Vector3::operator != (const std::initializer_list<double>& list) const {
