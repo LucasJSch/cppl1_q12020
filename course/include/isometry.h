@@ -14,7 +14,7 @@ class Vector3{
         Vector3(double x = 0, double y = 0, double z = 0) : x_{x}, y_{y}, z_{z} {};
         Vector3(const Vector3& v) : Vector3(v.x_, v.y_, v.z_) {};
         Vector3(const std::initializer_list<double>& l) {
-            if(l.size() > 3) {
+            if(l.size() != 3) {
                 throw "Invalid initializer list size";
             }
             std::initializer_list<double>::iterator it = l.begin();
