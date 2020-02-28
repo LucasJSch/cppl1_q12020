@@ -1,6 +1,6 @@
 #include <cmath>
 #include <cstdint>
-#include "../include/isometry.h"
+#include "isometry.h"
 
 namespace ekumen {
 namespace math {
@@ -254,7 +254,7 @@ Matrix3& operator = (Matrix3&& m) {
     r2_ = std::move(m.r2_);
     r3_ = std::move(m.r3_);
 
-    return *this;
+    return *this; // What about the original matrix? (m) It shouldn't have its rows available, if I'm not mistaken
 }
 
 // Getters
