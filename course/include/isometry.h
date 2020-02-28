@@ -89,10 +89,11 @@ class Matrix3{
         Matrix3(const std::initializer_list<double>&,
                 const std::initializer_list<double>&,
                 const std::initializer_list<double>&);
+        Matrix3(Matrix3&& m) : Matrix3(m.row(0), m.row(1), m.row(2)){}
 
         // Operators
-        Vector3& operator [] (const int);
-        const Vector3& operator [] (const int) const;
+        Vector3& operator [] (const uint8_t);
+        const Vector3& operator [] (const uint8_t) const;
         Matrix3 operator + (const Matrix3&) const;
         Matrix3 operator - (const Matrix3&) const;
         Matrix3 operator * (const Matrix3&) const;
@@ -105,21 +106,24 @@ class Matrix3{
         Matrix3& operator /= (const Matrix3&);
         bool operator == (const Matrix3&);
         bool operator != (const Matrix3&);
+        Vector3 operator * (const Vector3&);
+        Matrix3& operator = (Matrix3&&);
 
         friend Matrix3 operator * (const double d, const Matrix3& m) {
                 return Matrix3(m.r1_ * d, m.r2_ * d, m.r3_ * d);
         }
 
         friend std::ostream& operator << (std::ostream& os, const Matrix3& m) {
-        os << std::string("[") << m.row(0) << std::string(", ") << m.row(1) << 
-        std::string(", ") << m.row(2) << std::string("]");
-        return os;
+            os << std::string("[");
+            for(int i = 0; i < 3; i++) {
+                os << m.row(i);
+            }
+            return os;
         }
 
         // Getters
-        Vector3& row(int index);
-        const Vector3& row(int index) const;
-        const Vector3 col(int index) const;
+        Vector3 row(uint8_t index) const;
+        Vector3 col(uint8_t index) const;
 
         // Computations
         double det() const;

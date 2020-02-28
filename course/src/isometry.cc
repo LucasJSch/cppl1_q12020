@@ -1,6 +1,6 @@
 #include <cmath>
 #include <cstdint>
-#include "isometry.h"
+#include "../include/isometry.h"
 
 namespace ekumen {
 namespace math {
@@ -143,9 +143,18 @@ Matrix3::Matrix3(const std::initializer_list<double>& list) {
         throw "Invalid initializer list size";
     }
     std::initializer_list<double>::iterator it = list.begin();
-    r1_ = Vector3(std::initializer_list<double>{*it++, *it++, *it++});
-    r2_ = Vector3(std::initializer_list<double>{*it++, *it++, *it++});
-    r3_ = Vector3(std::initializer_list<double>{*it++, *it++, *it});
+
+    r1_[0] = *it++;
+    r1_[1] = *it++;
+    r1_[2] = *it++;
+
+    r2_[0] = *it++;
+    r2_[1] = *it++;
+    r2_[2] = *it++;
+
+    r3_[0] = *it++;
+    r3_[1] = *it++;
+    r3_[2] = *it++;
 }
 
 Matrix3::Matrix3(const std::initializer_list<double>& l1,
@@ -156,25 +165,30 @@ Matrix3::Matrix3(const std::initializer_list<double>& l1,
     r3_ = Vector3(l3);
 }
 
+Matrix3(Matrix3&& m) {
+    r1_ = m.r1_;
+
+}
+
 // Operators
-Vector3& Matrix3::operator [] (const int index) {
+Vector3& Matrix3::operator [] (const uint8_t index) {
     return this->row(index);
 }
 
-const Vector3& Matrix3::operator [] (const int index) const {
+const Vector3& Matrix3::operator [] (const uint8_t index) const {
     return this->row(index);
 }
 
 Matrix3 Matrix3::operator + (const Matrix3& m) const {
-    return Matrix3(r1_ + m.r1_, r2_ + m.r2_, r3_ + m.r3_);
+    return Vector3(x_ + v.x_, y_ + v.y_, z_ + v.z_);
 }
 
 Matrix3 Matrix3::operator - (const Matrix3& m) const {
-    return Matrix3(r1_ - m.r1_, r2_ - m.r2_, r3_ - m.r3_);
+    return Vector3(x_ - v.x_, y_ - v.y_, z_ - v.z_);
 }
 
 Matrix3 Matrix3::operator * (const Matrix3& m) const {
-    return Matrix3(r1_ * m.r1_, r2_ * m.r2_, r3_ * m.r3_);
+   return Vector3(x_ * v.x_, y_ * v.y_, z_ * v.z_);
 }
 
 Matrix3 Matrix3::operator * (const double d) const {
@@ -231,8 +245,20 @@ bool Matrix3::operator != (const Matrix3& m) {
     return !(*this == m);
 }
 
+Vector3 Matrix3::operator * (const Vector3& v) {
+    return Vector3(r1_.dot(v), r2_.dot(v), r3_.dot(v));
+}
+
+Matrix3& operator = (Matrix3&& m) {
+    r1_ = std::move(m.r1_);
+    r2_ = std::move(m.r2_);
+    r3_ = std::move(m.r3_);
+
+    return *this;
+}
+
 // Getters
-Vector3& Matrix3::row(int index) {
+Vector3 Matrix3::row(uint8_t index) const {
     switch(index) {
         case 0:
             return r1_;
@@ -245,21 +271,8 @@ Vector3& Matrix3::row(int index) {
     }
 }
 
-const Vector3& Matrix3::row(int index) const {
-    switch(index) {
-        case 0:
-            return r1_;
-        case 1:
-            return r2_;
-        case 2:
-            return r3_;
-        default:
-            throw "Error. Invalid row index for Matrix3";
-    }
-}
-
-const Vector3 Matrix3::col(int index) const {
-    if (index > 2) {
+Vector3 Matrix3::col(uint8_t index) const {
+    if(index > 2) {
         throw "Error. Invalid column index for Matrix3";
     }
     return Vector3(r1_[index], r2_[index], r3_[index]);
@@ -267,11 +280,11 @@ const Vector3 Matrix3::col(int index) const {
 
 // Computations
 double Matrix3::det() const {
-    double subdet1 =  r1_[0] * (r2_[1] * r3_[2] - r2_[2] * r3_[1]);
-    double subdet2 = -r1_[1] * (r2_[0] * r3_[2] - r2_[2] * r3_[0]);
-    double subdet3 =  r1_[2] * (r2_[0] * r3_[1] - r2_[1] * r3_[0]);
+    double subdet1 = r2_[1] * r3_[2] - r2_[2] * r3_[1];
+    double subdet2 = r2_[0] * r3_[2] - r2_[2] * r3_[0];
+    double subdet3 = r2_[0] * r3_[1] - r2_[1] * r3_[0];
 
-    return subdet1 + subdet2 + subdet3;
+    return r1_[0] * subdet1 - r1_[1] * subdet2 + r1_[2] * subdet3;
 }
 
 // Class constants
