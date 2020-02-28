@@ -5,7 +5,7 @@
 namespace ekumen {
 namespace math {
 
-const double& Vector3::operator [] (const int index) const {
+const double& Vector3::operator [] (const uint8_t index) const {
     if(index > 2) {
         throw "Invalid index number";
     }
@@ -19,7 +19,7 @@ const double& Vector3::operator [] (const int index) const {
     }
 }
 
-double& Vector3::operator [] (const int index) {
+double& Vector3::operator [] (const uint8_t index) {
     if(index > 2) {
         throw "Invalid index number";
     }
@@ -118,10 +118,9 @@ double Vector3::norm() const {
 }
 
 Vector3 Vector3::cross(const Vector3& v) const {
-    return Vector3(
-    y_ * v.z_ - z_ * v.y_, 
-    z_ * v.x_ - x_ * v.z_,
-    x_ * v.y_ - y_ * v.x_);
+    return Vector3(y_ * v.z_ - z_ * v.y_, 
+                   z_ * v.x_ - x_ * v.z_,
+                   x_ * v.y_ - y_ * v.x_);
 }
 
 // Class constants

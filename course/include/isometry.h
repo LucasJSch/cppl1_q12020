@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <iostream>
-#include <ostream>
 
 namespace ekumen {
 namespace math {
@@ -11,8 +10,8 @@ namespace math {
 class Vector3{
     public:
         // Constructors
-        Vector3(double x = 0, double y = 0, double z = 0) : x_{x}, y_{y}, z_{z} {};
-        Vector3(const Vector3& v) : Vector3(v.x_, v.y_, v.z_) {};
+        Vector3(double x = 0, double y = 0, double z = 0) : x_{x}, y_{y}, z_{z} {}
+        Vector3(const Vector3& v) : Vector3(v.x_, v.y_, v.z_) {}
         Vector3(const std::initializer_list<double>& l) {
             if(l.size() != 3) {
                 throw "Invalid initializer list size";
@@ -24,8 +23,8 @@ class Vector3{
         }
 
         // Operators
-        double& operator [] (const int);
-        const double& operator [] (const int) const;
+        double& operator [] (const uint8_t);
+        const double& operator [] (const uint8_t) const;
         Vector3 operator + (const Vector3&) const;
         Vector3 operator - (const Vector3&) const;
         Vector3 operator * (const Vector3&) const;
@@ -51,9 +50,9 @@ class Vector3{
         }
 
         // Getters
-        double x() const {return x_;};
-        double y() const {return y_;};
-        double z() const {return z_;};
+        const double& x() const {return x_;};
+        const double& y() const {return y_;};
+        const double& z() const {return z_;};
 
         // Setters
         double& x() {return x_;};
