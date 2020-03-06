@@ -76,7 +76,7 @@ class Vector3{
         double x_;
         double y_;
         double z_;
-};
+};  // Vector3
 
 class Matrix3{
     public:
@@ -137,7 +137,43 @@ class Matrix3{
         // Ordered by rows.
         Vector3 r1_, r2_, r3_;
 
-};
+};  // Matrix3
+
+class Isometry : public Matrix3 {
+
+    // Constructors
+    Isometry(const Vector3& v);
+    Isometry(const Vector3& v);
+    //constructor from n Vector3's ?
+
+    // Static operations
+    static Isometry FromTranslation(const Vector3&) const;
+    static Matrix3 RotateAround(const Vector3&, const double d) const;
+    //static const Isometry FromEulerAngles(const Vector3&); ?
+    static Vector3 FromEulerAngles(const double, const double, const double) const ;
+
+    // Operators
+    Matrix3& operator = (const Matrix3&) const;
+    Matrix3 operator * (const Matrix3&) const; //check if this applies for Isometry class
+    Matrix3 operator * (const Vector3&) const;
+
+    Vector3 transform(const Vector3&) const;
+    Matrix3 inverse() const;
+    Vector3 compose(const Isometry&) const;
+    Vector3 traslation() const;
+    Matrix3 rotation() const;
+
+    /*friend std::ostream& operator << (std::ostream& os, const Isometry& isometry) {
+        os << std::string("[");
+        for(int i = 0; i < 3; i++) {
+            os << isometry.row(i);
+        }
+        return os;
+    }*/
+
+    // Attributes
+
+};  // Isometry
 
 }  // namespace math
 }  // namespace ekumen
