@@ -297,5 +297,95 @@ const Matrix3 Matrix3::kOnes =
     Matrix3(Vector3(1,1,1), Vector3(1,1,1), Vector3(1,1,1));
 
 
+
+
+
+
+// Isometry
+
+Isometry Isometry::FromTranslation(const Vector3& v) const {
+    //scheinkerman Implement
+    return Isometry();
+}
+
+Vector3 Isometry::RotateAround(const Vector3& v, const double rotation_angle) const {
+
+    const double cangle{std::cos(rotation_angle)};
+    const double sangle{std::sin(rotation_angle)};
+
+    Vector4 extended_vector(v); //scheinkerman add method Vector4 from Vector3
+
+    Matrix4 x_rot_matrix(Vector4::kUnitX,
+                        Vector4(0, cangle, -sangle, 0),
+                        Vector4(0, sangle, cangle, 0), 
+                        Vector4::kUnitW);
+    Matrix4 y_rot_matrix(Vector4(cangle, 0, sangle, 0),
+                        Vector4::kUnitY,
+                        Vector4(-sangle, 0, cangle, 0), 
+                        Vector4::kUnitW);
+    Matrix4 z_rot_matrix(Vector4(cangle, -sangle, 0, 0)),
+                        Vector4(sangle, cangle, 0, 0),
+                        Vector4::kUnitZ, 
+                        Vector4::kUnitW);
+
+    return Vector3(x_rot_matrix * y_rot_matrix * z_rot_matrix * extended_vector); //scheinkerman add method Vector3 from Vector4
+
+}
+
+Isometry Isometry::FromEulerAngles(const double, const double, const double) const {
+    //scheinkerman Implement
+}
+
+
+// Operators
+Matrix3& operator = (const Isometry& t) const {
+    _rotation_matrix = t._rotation_matrix;
+    _translation_matrix = t._translation_matrix;
+}
+
+Vector3 operator * (const Vector3& v) const {
+    Vector4 extended_vector(v);
+    return _translation_matrix * _rotation_matrix * extended_vector;
+}
+
+
+// Misc
+
+Vector3 Isometry::transform(const Vector3& v) const {
+    return (*this) * v;
+}
+
+Isometry Isometry::compose(const Isometry& t) const {
+    return Isometry(_translation_matrix * t._translation_matrix,
+                    _rotation_matrix * t._rotation_matrix);
+}
+
+
+// Getters
+Matrix3 Isometry::inverse() const {
+    //scheinkerman Implement
+}
+
+Vector3 Isometry::traslation() const {
+    return Vector3(get_x_translation(), get_x_translation(), get_x_translation());
+}
+
+Matrix3 Isometry::rotation() const {
+    return Matrix3(_rotation_matrix); 
+    //scheinkerman Implement Matrix3 from Matrix4
+}
+
+const double get_x_translation() const {
+    return _translation_matrix[0][3];
+}
+
+const double get_y_translation() const {
+    return _translation_matrix[1][3];
+}
+
+const double get_z_translation() const {
+    return _translation_matrix[2][3];
+}
+
 }  // namespace math
 }  // namespace ekumen

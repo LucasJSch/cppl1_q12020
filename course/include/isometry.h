@@ -139,39 +139,56 @@ class Matrix3{
 
 };  // Matrix3
 
-class Isometry : public Matrix3 {
+class Isometry : Matrix4 {
 
-    // Constructors
-    Isometry(const Vector3& v);
-    Isometry(const Vector3& v);
-    //constructor from n Vector3's ?
+    public:
+        // Constructors
+        Isometry(const Vector3& translation_vector = Vector3(), 
+                 const Matrix3& rotation_matrix = Matrix3()) :
+                _translation_matrix{{1, 0, 0, translation_vector.x()},
+                                    {0, 1, 0, translation_vector.y()},
+                                    {0, 0, 1, translation_vector.z()},
+                                    Vector4::kUnitW},
+                _rotation_matrix{rotation_matrix} {} //scheinkerman Implement Matrix4 from Matrix3
 
-    // Static operations
-    static Isometry FromTranslation(const Vector3&) const;
-    static Matrix3 RotateAround(const Vector3&, const double d) const;
-    //static const Isometry FromEulerAngles(const Vector3&); ?
-    static Vector3 FromEulerAngles(const double, const double, const double) const ;
+        Isometry(const Vector4& translation_vector = Vector4(),
+                 const Matrix4& rotation_matrix = Matrix4()) :
+                _translation_matrix{translation_vector},
+                _rotation_matrix{rotation_matrix} {}
+                 
 
-    // Operators
-    Matrix3& operator = (const Matrix3&) const;
-    Matrix3 operator * (const Matrix3&) const; //check if this applies for Isometry class
-    Matrix3 operator * (const Vector3&) const;
+        // Static operations
+        static Isometry FromTranslation(const Vector3&) const;
+        static Vector3 RotateAround(const Vector3&, const double) const;
+        //static const Isometry FromEulerAngles(const Vector3&); ?
+        static Isometry FromEulerAngles(const double, const double, const double) const ;
 
-    Vector3 transform(const Vector3&) const;
-    Matrix3 inverse() const;
-    Vector3 compose(const Isometry&) const;
-    Vector3 traslation() const;
-    Matrix3 rotation() const;
+        // Operators
+        Matrix3& operator = (const Matrix3&) const;
+        Vector3 operator * (const Vector3&) const;
 
-    /*friend std::ostream& operator << (std::ostream& os, const Isometry& isometry) {
-        os << std::string("[");
-        for(int i = 0; i < 3; i++) {
-            os << isometry.row(i);
+        // Misc
+        Vector3 transform(const Vector3&) const;
+        Isometry compose(const Isometry&) const;
+
+        // Getters
+        Vector3 traslation() const;
+        Matrix3 rotation() const;
+        Matrix3 inverse() const;
+        const double get_x_translation() const;
+        const double get_y_translation() const;
+        const double get_z_translation() const;
+
+        friend std::ostream& operator << (std::ostream& os, const Isometry& isometry) {
+            os << std::string("[");
+            os << "T: " << traslation() << ", R:" << rotation();
+            return os;
         }
-        return os;
-    }*/
 
-    // Attributes
+    private:
+        // Attributes
+        Matrix4 _translation_matrix;
+        Matrix4 _rotation_matrix;
 
 };  // Isometry
 
