@@ -11,10 +11,10 @@ namespace math {
 class Vector4{
     public:
         // Constructors
-        Vector4(double x = 0, double y = 0, double z = 0) : x_{x}, y_{y}, z_{z}, w_{w} {}
+        Vector4(double x = 0, double y = 0, double z = 0, double w = 0) : x_{x}, y_{y}, z_{z}, w_{w} {}
         Vector4(const Vector4& v) : Vector4(v.x_, v.y_, v.z_, v.w_) {}
         Vector4(const std::initializer_list<double>& l) {
-            if(l.size() != 3) {
+            if(l.size() != 4) {
                 throw "Invalid initializer list size";
             }
             std::initializer_list<double>::iterator it = l.begin();
@@ -89,7 +89,7 @@ class Matrix4{
                 const Vector4& r2 = Vector4(), 
                 const Vector4& r3 = Vector4(),
                 const Vector4& r4 = Vector4())
-                 : r1_{r1}, r2_{r2}, r3_{r3}, r34_{r4} {}
+                 : r1_{r1}, r2_{r2}, r3_{r3}, r4_{r4} {}
         Matrix4(const Matrix4& m) : Matrix4(m.row(0), m.row(1), m.row(2), m.row(3)) {}
         Matrix4(const std::initializer_list<double>& list);
         Matrix4(const std::initializer_list<double>&,
@@ -142,7 +142,7 @@ class Matrix4{
 
     private:
         // Ordered by rows.
-        Vector4 r1_, r2_, r3_;
+        Vector4 r1_, r2_, r3_, r4_;
 
 };
 

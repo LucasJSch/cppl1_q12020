@@ -6,7 +6,7 @@ namespace ekumen {
 namespace math {
 
 const double& Vector4::operator [] (const uint8_t index) const {
-    if(index > 2) {
+    if(index > 3) {
         throw "Invalid index number";
     }
     switch(index) {
@@ -22,7 +22,7 @@ const double& Vector4::operator [] (const uint8_t index) const {
 }
 
 double& Vector4::operator [] (const uint8_t index) {
-    if(index > 2) {
+    if(index > 3) {
         throw "Invalid index number";
     }
     switch(index) {
@@ -130,7 +130,7 @@ double Vector4::norm() const {
 const Vector4 Vector4::kUnitX = Vector4(1, 0, 0, 0);
 const Vector4 Vector4::kUnitY = Vector4(0, 1, 0, 0);
 const Vector4 Vector4::kUnitZ = Vector4(0, 0, 1, 0);
-const Vector4 Vector4::kUnitW = Vector4(0, 0, 1, 0);
+const Vector4 Vector4::kUnitW = Vector4(0, 0, 0, 1);
 const Vector4 Vector4::kZero = Vector4(0, 0, 0, 0);
 
 // Constructors
@@ -171,32 +171,47 @@ Matrix4::Matrix4(const std::initializer_list<double>& l1,
     r4_ = Vector4(l4);
 }
 
-Matrix4(Matrix4&& m) {
-    r1_ = m.r1_;
-    r2_ = m.r2_;
-    r3_ = m.r3_;
-    r4_ = m.r4_;
-}
-
 // Operators
 Vector4& Matrix4::operator [] (const uint8_t index) {
-    return this->row(index);
+    switch(index) {
+        case 0:
+            return r1_;
+        case 1:
+            return r2_;
+        case 2:
+            return r3_;
+        case 3:
+            return r4_;
+        default:
+            throw "Error. Invalid row index for Matrix4";
+    }
 }
 
 const Vector4& Matrix4::operator [] (const uint8_t index) const {
-    return this->row(index);
+    switch(index) {
+        case 0:
+            return r1_;
+        case 1:
+            return r2_;
+        case 2:
+            return r3_;
+        case 3:
+            return r4_;
+        default:
+            throw "Error. Invalid row index for Matrix4";
+    }
 }
 
 Matrix4 Matrix4::operator + (const Matrix4& m) const {
-    return Vector4(x_ + v.x_, y_ + v.y_, z_ + v.z_ + v.w_);
+    return Matrix4(r1_ + m.r1_, r2_ + m.r2_, r3_ + m.r3_, r4_ + m.r4_);
 }
 
 Matrix4 Matrix4::operator - (const Matrix4& m) const {
-    return Vector4(x_ - v.x_, y_ - v.y_, z_ - v.z_, w_ - v.w_);
+    return Matrix4(r1_ - m.r1_, r2_ - m.r2_, r3_ - m.r3_, r4_ - m.r4_);
 }
 
 Matrix4 Matrix4::operator * (const Matrix4& m) const {
-   return Vector4(x_ * v.x_, y_ * v.y_, z_ * v.z_, w_ * v.w_);
+    return Matrix4(r1_ * m.r1_, r2_ * m.r2_, r3_ * m.r3_, r4_ * m.r4_);
 }
 
 Matrix4 Matrix4::operator * (const double d) const {
@@ -262,7 +277,7 @@ Vector4 Matrix4::operator * (const Vector4& v) {
     return Vector4(r1_.dot(v), r2_.dot(v), r3_.dot(v), r4_.dot(v));
 }
 
-Matrix4& operator = (Matrix4&& m) {
+Matrix4& Matrix4::operator = (Matrix4&& m) {
     r1_ = std::move(m.r1_);
     r2_ = std::move(m.r2_);
     r3_ = std::move(m.r3_);
@@ -273,18 +288,7 @@ Matrix4& operator = (Matrix4&& m) {
 
 // Getters
 Vector4 Matrix4::row(uint8_t index) const {
-    switch(index) {
-        case 0:
-            return r1_;
-        case 1:
-            return r2_;
-        case 2:
-            return r3_;
-        case 3:
-            return r4_;
-        default:
-            throw "Error. Invalid row index for Matrix4";
-    }
+    return Vector4((*this)[index]);
 }
 
 Vector4 Matrix4::col(uint8_t index) const {
@@ -296,7 +300,7 @@ Vector4 Matrix4::col(uint8_t index) const {
 
 // Computations
 double Matrix4::det() const {
-    // Implement
+    //scheinkerman Implement
 }
 
 // Class constants
