@@ -1,6 +1,6 @@
 #include <cmath>
 #include <cstdint>
-#include "isometry.h"
+#include "../include/isometry.h"
 
 namespace ekumen {
 namespace math {
@@ -165,30 +165,43 @@ Matrix3::Matrix3(const std::initializer_list<double>& l1,
     r3_ = Vector3(l3);
 }
 
-Matrix3(Matrix3&& m) {
-    r1_ = m.r1_;
-
-}
-
 // Operators
 Vector3& Matrix3::operator [] (const uint8_t index) {
-    return this->row(index);
+    switch(index) {
+        case 0:
+            return r1_;
+        case 1:
+            return r2_;
+        case 2:
+            return r3_;
+        default:
+            throw "Error. Invalid row index for Matrix3";
+    }
 }
 
 const Vector3& Matrix3::operator [] (const uint8_t index) const {
-    return this->row(index);
+    switch(index) {
+        case 0:
+            return r1_;
+        case 1:
+            return r2_;
+        case 2:
+            return r3_;
+        default:
+            throw "Error. Invalid row index for Matrix3";
+    }
 }
 
 Matrix3 Matrix3::operator + (const Matrix3& m) const {
-    return Vector3(x_ + v.x_, y_ + v.y_, z_ + v.z_);
+    return Matrix3(r1_ + m.r1_, r2_ + m.r2_, r3_ + m.r3_);
 }
 
 Matrix3 Matrix3::operator - (const Matrix3& m) const {
-    return Vector3(x_ - v.x_, y_ - v.y_, z_ - v.z_);
+    return Matrix3(r1_ - m.r1_, r2_ - m.r2_, r3_ - m.r3_);
 }
 
 Matrix3 Matrix3::operator * (const Matrix3& m) const {
-   return Vector3(x_ * v.x_, y_ * v.y_, z_ * v.z_);
+    return Matrix3(r1_ * m.r1_, r2_ * m.r2_, r3_ * m.r3_);
 }
 
 Matrix3 Matrix3::operator * (const double d) const {
@@ -249,7 +262,7 @@ Vector3 Matrix3::operator * (const Vector3& v) {
     return Vector3(r1_.dot(v), r2_.dot(v), r3_.dot(v));
 }
 
-Matrix3& operator = (Matrix3&& m) {
+Matrix3& Matrix3::operator = (Matrix3&& m) {
     r1_ = std::move(m.r1_);
     r2_ = std::move(m.r2_);
     r3_ = std::move(m.r3_);
@@ -259,16 +272,7 @@ Matrix3& operator = (Matrix3&& m) {
 
 // Getters
 Vector3 Matrix3::row(uint8_t index) const {
-    switch(index) {
-        case 0:
-            return r1_;
-        case 1:
-            return r2_;
-        case 2:
-            return r3_;
-        default:
-            throw "Error. Invalid row index for Matrix3";
-    }
+    return Vector3((*this)[index]);
 }
 
 Vector3 Matrix3::col(uint8_t index) const {
