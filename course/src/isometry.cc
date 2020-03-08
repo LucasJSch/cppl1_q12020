@@ -6,7 +6,7 @@ namespace ekumen {
 namespace math {
 
 const double& Vector4::operator [] (const uint8_t index) const {
-    if(index > 2) {
+    if(index > 3) {
         throw "Invalid index number";
     }
     switch(index) {
@@ -22,7 +22,7 @@ const double& Vector4::operator [] (const uint8_t index) const {
 }
 
 double& Vector4::operator [] (const uint8_t index) {
-    if(index > 2) {
+    if(index > 3) {
         throw "Invalid index number";
     }
     switch(index) {
@@ -130,7 +130,7 @@ double Vector4::norm() const {
 const Vector4 Vector4::kUnitX = Vector4(1, 0, 0, 0);
 const Vector4 Vector4::kUnitY = Vector4(0, 1, 0, 0);
 const Vector4 Vector4::kUnitZ = Vector4(0, 0, 1, 0);
-const Vector4 Vector4::kUnitW = Vector4(0, 0, 1, 0);
+const Vector4 Vector4::kUnitW = Vector4(0, 0, 0, 1);
 const Vector4 Vector4::kZero = Vector4(0, 0, 0, 0);
 
 }  // namespace math

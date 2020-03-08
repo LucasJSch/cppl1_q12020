@@ -10,10 +10,10 @@ namespace math {
 class Vector4{
     public:
         // Constructors
-        Vector4(double x = 0, double y = 0, double z = 0) : x_{x}, y_{y}, z_{z}, w_{w} {}
+        Vector4(double x = 0, double y = 0, double z = 0, double w = 0) : x_{x}, y_{y}, z_{z}, w_{w} {}
         Vector4(const Vector4& v) : Vector4(v.x_, v.y_, v.z_, v.w_) {}
         Vector4(const std::initializer_list<double>& l) {
-            if(l.size() != 3) {
+            if(l.size() != 4) {
                 throw "Invalid initializer list size";
             }
             std::initializer_list<double>::iterator it = l.begin();
