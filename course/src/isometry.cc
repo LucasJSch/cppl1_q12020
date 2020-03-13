@@ -583,14 +583,14 @@ Matrix4& Matrix4::operator /= (const Matrix4& m) {
     return *this;
 }
 
-bool Matrix4::operator == (const Matrix4& m) {
+bool Matrix4::operator == (const Matrix4& m) const {
     if ((r1_ == m.r1_) && (r2_ == m.r2_) && (r3_ == m.r3_) && (r3_ == m.r3_)) {
         return true;
     }
     return false;
 }
 
-bool Matrix4::operator != (const Matrix4& m) {
+bool Matrix4::operator != (const Matrix4& m) const {
     return !(*this == m);
 }
 
@@ -611,7 +611,7 @@ Matrix4 Matrix4::operator ^ (const Matrix4& m) const {
     Matrix4 result;
     for(int i = 0; i < 4; i++) {
         for(int j = 0; j < 4; j++) {
-            result[i][j] = (*this)[i].dot(m[j]);
+            result[i][j] = this->row(i).dot(m.col(j));
         }
     }
     return result;
@@ -653,46 +653,69 @@ Isometry Isometry::FromTranslation(const Vector3& v) {
     return Isometry(v);
 }
 
-Vector3 Isometry::RotateAround(const Vector3& v, const double rotation_angle) {
+Isometry Isometry::RotateAround(const Vector3& v, const double rotation_angle) {
 
     const double cangle{std::cos(rotation_angle)};
     const double sangle{std::sin(rotation_angle)};
 
-    Vector4 extended_vector(v); //scheinkerman add method Vector4 from Vector3
+    Matrix4 rot_matrix;
 
-    Matrix4 x_rot_matrix(Vector4::kUnitX,
-                        Vector4(0, cangle, -sangle, 0),
-                        Vector4(0, sangle, cangle, 0), 
-                        Vector4::kUnitW);
-    Matrix4 y_rot_matrix(Vector4(cangle, 0, sangle, 0),
-                        Vector4::kUnitY,
-                        Vector4(-sangle, 0, cangle, 0), 
-                        Vector4::kUnitW);
-    Matrix4 z_rot_matrix(Vector4(cangle, -sangle, 0, 0),
-                        Vector4(sangle, cangle, 0, 0),
-                        Vector4::kUnitZ, 
-                        Vector4::kUnitW);
+    if (v == Vector3::kUnitX) {
+        rot_matrix = Matrix4(Vector4::kUnitX,
+                             Vector4(0, cangle, -sangle, 0),
+                             Vector4(0, sangle, cangle, 0), 
+                             Vector4::kUnitW);
+    }
+    else if (v == Vector3::kUnitY) {
+        rot_matrix = Matrix4(Vector4(cangle, 0, sangle, 0),
+                             Vector4::kUnitY,
+                             Vector4(-sangle, 0, cangle, 0), 
+                             Vector4::kUnitW);
+    }
+    else if (v == Vector3::kUnitZ) {
+        rot_matrix = Matrix4(Vector4(cangle, -sangle, 0, 0),
+                             Vector4(sangle, cangle, 0, 0),
+                             Vector4::kUnitZ, 
+                             Vector4::kUnitW);
+    }
+    else {
+        throw "Invalid rotation axis";
+    }
 
-    return ToVector3((x_rot_matrix ^ y_rot_matrix ^ z_rot_matrix) * extended_vector); //scheinkerman add method Vector3 from Vector4
+    return Isometry(Vector3(), rot_matrix);
+
+
 }
 
-Isometry Isometry::FromEulerAngles(const double, const double, const double) {
-    //scheinkerman Implement
+Isometry Isometry::FromEulerAngles(const double roll, 
+                                   const double pitch,
+                                   const double yaw) {
+    return Isometry(Isometry::RotateAround(Vector3::kUnitX, roll) *
+                    Isometry::RotateAround(Vector3::kUnitY, pitch) *
+                    Isometry::RotateAround(Vector3::kUnitZ, yaw));
 }
 
 
 // Operators
 Matrix3& Isometry::operator = (const Matrix3& m) {
-    //scheinkerman Incorrect. Fix this.
-    _rotation_matrix = ToMatrix4(m);
-    _translation_matrix = ToMatrix4(m);
+    rotation_matrix_ = ToMatrix4(m);
+    translation_matrix_ = ToMatrix4(m);
 }
 
 Vector3 Isometry::operator * (const Vector3& v) const {
-    Vector4 extended_vector(v);
-    return ToVector3((_translation_matrix ^ _rotation_matrix) * extended_vector);
+    Vector4 extended_vector(v, 1);
+    return ToVector3((translation_matrix_ ^ rotation_matrix_) * extended_vector);
 }
 
+Isometry Isometry::operator * (const Isometry& t) const {
+    return Isometry(translation_matrix_ ^ t.translation_matrix_,
+                    rotation_matrix_ ^ t.rotation_matrix_);
+}
+
+bool Isometry::operator == (const Isometry& t) const {
+    return (rotation_matrix_ == ToMatrix4(t.rotation())) && 
+           (translation_matrix_.row(3) == t.translation_matrix_.row(3));
+}
 
 // Misc
 
@@ -705,34 +728,71 @@ Isometry Isometry::compose(const Isometry& t) const {
                   get_y_translation() + t.get_y_translation(),
                   get_z_translation() + t.get_z_translation());
     
-    return Isometry(trans, _rotation_matrix ^ t._rotation_matrix);
+    return Isometry(trans, rotation_matrix_ ^ t.rotation_matrix_);
 }
 
 
 // Getters
-Matrix3 Isometry::inverse() const {
-    //scheinkerman Implement
+Isometry Isometry::inverse() const {
+    return Isometry(this->translation() * -1);
 }
 
-Vector3 Isometry::traslation() const {
-    return Vector3(get_x_translation(), get_x_translation(), get_x_translation());
+Vector3 Isometry::translation() const {
+    return Vector3(get_x_translation(), get_y_translation(), get_z_translation());
 }
 
 Matrix3 Isometry::rotation() const {
-    return ToMatrix3(_rotation_matrix); 
-    //scheinkerman Implement Matrix3 from Matrix4
+    return ToMatrix3(rotation_matrix_); 
 }
 
 const double Isometry::get_x_translation() const {
-    return _translation_matrix[0][3];
+    return translation_matrix_[0][3];
 }
 
 const double Isometry::get_y_translation() const {
-    return _translation_matrix[1][3];
+    return translation_matrix_[1][3];
 }
 
 const double Isometry::get_z_translation() const {
-    return _translation_matrix[2][3];
+    return translation_matrix_[2][3];
+}
+
+Matrix4 Isometry::ToMatrix4(const Matrix3& m) {
+    Matrix4 result;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            result[i][j] = m [i][j];
+        }
+    }
+    result[3][3] = 1;
+    return result;
+}
+
+Vector4 Isometry::ToVector4(const Vector3& v) {
+    Vector4 result;
+    for (int i = 0; i < 3; i++) {
+        result[i] = v[i];
+    }
+    result[3] = 1;
+    return result;
+}
+
+Matrix3 Isometry::ToMatrix3(const Matrix4& m) {
+    Matrix3 result;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            result[i][j] = m[i][j];
+        }
+    }
+    return result;
+}
+
+Vector3 Isometry::ToVector3(const Vector4& v) {
+    Vector3 result;
+    for (int i = 0; i < 3; i++) {
+        result[i] = v[i];
+    }
+    return result;
 }
 
 }  // namespace math

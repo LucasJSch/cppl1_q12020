@@ -248,8 +248,8 @@ class Matrix4{
         Matrix4& operator -= (const Matrix4&);
         Matrix4& operator *= (const Matrix4&);
         Matrix4& operator /= (const Matrix4&);
-        bool operator == (const Matrix4&);
-        bool operator != (const Matrix4&);
+        bool operator == (const Matrix4&) const;
+        bool operator != (const Matrix4&) const;
         Vector4 operator * (const Vector4&);
         Matrix4& operator = (Matrix4&&);
 
@@ -259,7 +259,7 @@ class Matrix4{
 
         friend std::ostream& operator << (std::ostream& os, const Matrix4& m) {
             os << std::string("[");
-            for(int i = 0; i < 3; i++) {
+            for(int i = 0; i < 4; i++) {
                 os << m.row(i);
             }
             return os;
@@ -289,54 +289,64 @@ class Isometry {
         // Constructors
         Isometry(const Vector3& translation_vector = Vector3(), 
                  const Matrix3& rotation_matrix = Matrix3::kIdentity) :
-                _translation_matrix{{1, 0, 0, translation_vector.x()},
+                translation_matrix_{{1, 0, 0, translation_vector.x()},
                                     {0, 1, 0, translation_vector.y()},
                                     {0, 0, 1, translation_vector.z()},
                                     Vector4::kUnitW},
-                _rotation_matrix{rotation_matrix} {} //scheinkerman Implement Matrix4 from Matrix3
+                rotation_matrix_{ToMatrix4(rotation_matrix)} {}
 
         Isometry(const Vector4& translation_vector = Vector4(),
                  const Matrix4& rotation_matrix = Matrix4::kIdentity) :
-                _translation_matrix{translation_vector},
-                _rotation_matrix{rotation_matrix} {}
-                 
+                translation_matrix_{{1, 0, 0, translation_vector.x()},
+                                    {0, 1, 0, translation_vector.y()},
+                                    {0, 0, 1, translation_vector.z()},
+                                    Vector4::kUnitW},
+                rotation_matrix_{rotation_matrix} {}
+        Isometry(const Isometry& t) : 
+            translation_matrix_{t.translation_matrix_},
+            rotation_matrix_{t.rotation_matrix_} {}
+        Isometry(const Matrix4& trans_matrix, const Matrix4& rot_matrix) : 
+            translation_matrix_{trans_matrix},
+            rotation_matrix_{rot_matrix} {}
 
         // Static operations
         static Isometry FromTranslation(const Vector3&);
-        static Vector3 RotateAround(const Vector3&, const double);
-        //static const Isometry FromEulerAngles(const Vector3&); ?
+        static Isometry RotateAround(const Vector3&, const double);
         static Isometry FromEulerAngles(const double, const double, const double);
 
         // Operators
         Matrix3& operator = (const Matrix3&);
         Vector3 operator * (const Vector3&) const;
+        Isometry operator * (const Isometry&) const;
+        bool operator == (const Isometry&) const;
 
         // Misc
         Vector3 transform(const Vector3&) const;
         Isometry compose(const Isometry&) const;
 
         // Getters
-        Vector3 traslation() const;
+        Vector3 translation() const;
         Matrix3 rotation() const;
-        Matrix3 inverse() const;
+        Isometry inverse() const;
         const double get_x_translation() const;
         const double get_y_translation() const;
         const double get_z_translation() const;
 
         friend std::ostream& operator << (std::ostream& os, const Isometry& isometry) {
             os << std::string("[");
-            os << "T: " << isometry.traslation() << ", R:" << isometry.rotation();
+            os << "T: " << isometry.translation() << ", R:" << isometry.rotation();
             return os;
         }
 
-    private:
+    //private:
         static Matrix4 ToMatrix4(const Matrix3&);
         static Vector4 ToVector4(const Vector3&);
         static Matrix3 ToMatrix3(const Matrix4&);
         static Vector3 ToVector3(const Vector4&);
         // Attributes
-        Matrix4 _translation_matrix;
-        Matrix4 _rotation_matrix;
+        Matrix4 translation_matrix_;
+        Matrix4 rotation_matrix_;
+        Vector4 translation_vector_;
 
 };  // Isometry
 
