@@ -338,7 +338,7 @@ class Isometry {
             return os;
         }
 
-    //private:
+    private:
         static Matrix4 ToMatrix4(const Matrix3&);
         static Vector4 ToVector4(const Vector3&);
         static Matrix3 ToMatrix3(const Matrix4&);
