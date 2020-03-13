@@ -1,6 +1,6 @@
 #include <cmath>
 #include <cstdint>
-#include "../include/isometry.h"
+#include "isometry.h"
 
 namespace ekumen {
 namespace math {
@@ -166,7 +166,7 @@ Matrix3::Matrix3(const std::initializer_list<double>& l1,
 }
 
 // Operators
-Vector3& Matrix3::operator [] (const uint8_t index) {
+Vector3& Matrix3::operator [] (const uint32_t index) {
     switch(index) {
         case 0:
             return r1_;
@@ -179,7 +179,7 @@ Vector3& Matrix3::operator [] (const uint8_t index) {
     }
 }
 
-const Vector3& Matrix3::operator [] (const uint8_t index) const {
+const Vector3& Matrix3::operator [] (const uint32_t index) const {
     switch(index) {
         case 0:
             return r1_;
@@ -193,15 +193,21 @@ const Vector3& Matrix3::operator [] (const uint8_t index) const {
 }
 
 Matrix3 Matrix3::operator + (const Matrix3& m) const {
-    return Matrix3(r1_ + m.r1_, r2_ + m.r2_, r3_ + m.r3_);
+    Matrix3 lhs(*this);
+    lhs += m;
+    return lhs;
 }
 
 Matrix3 Matrix3::operator - (const Matrix3& m) const {
-    return Matrix3(r1_ - m.r1_, r2_ - m.r2_, r3_ - m.r3_);
+    Matrix3 lhs(*this);
+    lhs -= m;
+    return lhs;
 }
 
 Matrix3 Matrix3::operator * (const Matrix3& m) const {
-    return Matrix3(r1_ * m.r1_, r2_ * m.r2_, r3_ * m.r3_);
+    Matrix3 lhs(*this);
+    lhs *= m;
+    return lhs;
 }
 
 Matrix3 Matrix3::operator * (const double d) const {
@@ -267,15 +273,15 @@ Matrix3& Matrix3::operator = (Matrix3&& m) {
     r2_ = std::move(m.r2_);
     r3_ = std::move(m.r3_);
 
-    return *this; // What about the original matrix? (m) It shouldn't have its rows available, if I'm not mistaken
+    return *this;
 }
 
 // Getters
-Vector3 Matrix3::row(uint8_t index) const {
-    return Vector3((*this)[index]);
+Vector3 Matrix3::row(uint32_t index) const {
+    return (*this)[index];
 }
 
-Vector3 Matrix3::col(uint8_t index) const {
+Vector3 Matrix3::col(uint32_t index) const {
     if(index > 2) {
         throw "Error. Invalid column index for Matrix3";
     }
@@ -293,12 +299,13 @@ double Matrix3::det() const {
 
 // Class constants
 const Matrix3 Matrix3::kIdentity = 
-    Matrix3(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,1));
+    Matrix3(Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
 
-const Matrix3 Matrix3::kZero = Matrix3();
+const Matrix3 Matrix3::kZero = 
+    Matrix3(Vector3(0, 0, 0), Vector3(0, 0, 0), Vector3(0, 0, 0));
 
 const Matrix3 Matrix3::kOnes = 
-    Matrix3(Vector3(1,1,1), Vector3(1,1,1), Vector3(1,1,1));
+    Matrix3(Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1));
 
 
 }  // namespace math

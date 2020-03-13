@@ -92,8 +92,8 @@ class Matrix3{
         Matrix3(Matrix3&& m) : Matrix3(m.row(0), m.row(1), m.row(2)){}
 
         // Operators
-        Vector3& operator [] (const uint8_t);
-        const Vector3& operator [] (const uint8_t) const;
+        Vector3& operator [] (const uint32_t);
+        const Vector3& operator [] (const uint32_t) const;
         Matrix3 operator + (const Matrix3&) const;
         Matrix3 operator - (const Matrix3&) const;
         Matrix3 operator * (const Matrix3&) const;
@@ -114,16 +114,21 @@ class Matrix3{
         }
 
         friend std::ostream& operator << (std::ostream& os, const Matrix3& m) {
+            auto print_vector3 = [&](const Vector3& v) -> std::ostream& {
+                    os << "[" << v.x() << ", " << v.y() << ", " << v.z() << "]";
+                    return os;
+            };
+
             os << std::string("[");
-            for(int i = 0; i < 3; i++) {
-                os << m.row(i);
-            }
+            print_vector3(m.row(0)) << ", ";
+            print_vector3(m.row(1)) << ", ";
+            print_vector3(m.row(2)) << "]";
             return os;
         }
 
         // Getters
-        Vector3 row(uint8_t index) const;
-        Vector3 col(uint8_t index) const;
+        Vector3 row(uint32_t index) const;
+        Vector3 col(uint32_t index) const;
 
         // Computations
         double det() const;
@@ -136,7 +141,6 @@ class Matrix3{
     private:
         // Ordered by rows.
         Vector3 r1_, r2_, r3_;
-
 };
 
 }  // namespace math
