@@ -165,30 +165,47 @@ Matrix3::Matrix3(const std::initializer_list<double>& l1,
     r3_ = Vector3(l3);
 }
 
-Matrix3(Matrix3&& m) {
-    r1_ = m.r1_;
-
-}
-
 // Operators
 Vector3& Matrix3::operator [] (const uint8_t index) {
-    return this->row(index);
+    switch(index) {
+        case 0:
+            return r1_;
+        case 1:
+            return r2_;
+        case 2:
+            return r3_;
+        default:
+            throw "Error. Invalid row index for Matrix3";
+    }
 }
 
 const Vector3& Matrix3::operator [] (const uint8_t index) const {
-    return this->row(index);
+    switch(index) {
+        case 0:
+            return r1_;
+        case 1:
+            return r2_;
+        case 2:
+            return r3_;
+        default:
+            throw "Error. Invalid row index for Matrix3";
+    }
 }
 
 Matrix3 Matrix3::operator + (const Matrix3& m) const {
-    return Vector3(x_ + v.x_, y_ + v.y_, z_ + v.z_);
+    return Matrix3(r1_ + m.r1_, r2_ + m.r2_, r3_ + m.r3_);
 }
 
 Matrix3 Matrix3::operator - (const Matrix3& m) const {
-    return Vector3(x_ - v.x_, y_ - v.y_, z_ - v.z_);
+    return Matrix3(r1_ - m.r1_, r2_ - m.r2_, r3_ - m.r3_);
 }
 
 Matrix3 Matrix3::operator * (const Matrix3& m) const {
-   return Vector3(x_ * v.x_, y_ * v.y_, z_ * v.z_);
+    return Matrix3(r1_ * m.r1_, r2_ * m.r2_, r3_ * m.r3_);
+}
+
+Vector3 Matrix3::operator * (const Vector3& v) const {
+    return Vector3(r1_.dot(v), r2_.dot(v), r3_.dot(v));
 }
 
 Matrix3 Matrix3::operator * (const double d) const {
@@ -245,11 +262,7 @@ bool Matrix3::operator != (const Matrix3& m) {
     return !(*this == m);
 }
 
-Vector3 Matrix3::operator * (const Vector3& v) {
-    return Vector3(r1_.dot(v), r2_.dot(v), r3_.dot(v));
-}
-
-Matrix3& operator = (Matrix3&& m) {
+Matrix3& Matrix3::operator = (Matrix3&& m) {
     r1_ = std::move(m.r1_);
     r2_ = std::move(m.r2_);
     r3_ = std::move(m.r3_);
@@ -257,18 +270,19 @@ Matrix3& operator = (Matrix3&& m) {
     return *this; // What about the original matrix? (m) It shouldn't have its rows available, if I'm not mistaken
 }
 
+Matrix3 Matrix3::operator ^ (const Matrix3& m) const { 
+    Matrix3 result;
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+            result[i][j] = (*this)[i].dot(m[j]);
+        }
+    }
+    return result;
+}
+
 // Getters
 Vector3 Matrix3::row(uint8_t index) const {
-    switch(index) {
-        case 0:
-            return r1_;
-        case 1:
-            return r2_;
-        case 2:
-            return r3_;
-        default:
-            throw "Error. Invalid row index for Matrix3";
-    }
+    return Vector3((*this)[index]);
 }
 
 Vector3 Matrix3::col(uint8_t index) const {
@@ -296,6 +310,112 @@ const Matrix3 Matrix3::kZero = Matrix3();
 const Matrix3 Matrix3::kOnes = 
     Matrix3(Vector3(1,1,1), Vector3(1,1,1), Vector3(1,1,1));
 
+// Isometry
+
+Isometry Isometry::FromTranslation(const Vector3& v) {
+    return Isometry(v);
+}
+
+Isometry Isometry::RotateAround(const Vector3& v, const double rotation_angle) {
+
+    const double cangle{std::cos(rotation_angle)};
+    const double sangle{std::sin(rotation_angle)};
+
+    Matrix3 rot_matrix;
+
+    if (v == Vector3::kUnitX) {
+        rot_matrix = Matrix3(Vector3::kUnitX,
+                             Vector3(0, cangle, -sangle),
+                             Vector3(0, sangle, cangle));
+    }
+    else if (v == Vector3::kUnitY) {
+        rot_matrix = Matrix3(Vector3(cangle, 0, sangle),
+                             Vector3::kUnitY,
+                             Vector3(-sangle, 0, cangle));
+    }
+    else if (v == Vector3::kUnitZ) {
+        rot_matrix = Matrix3(Vector3(cangle, -sangle, 0),
+                             Vector3(sangle, cangle, 0),
+                             Vector3::kUnitZ);
+    }
+    else {
+        throw "Invalid rotation axis";
+    }
+
+    return Isometry(Vector3(), rot_matrix);
+
+
+}
+
+Isometry Isometry::FromEulerAngles(const double roll, 
+                                   const double pitch,
+                                   const double yaw) {
+    return Isometry(Isometry::RotateAround(Vector3::kUnitX, roll) *
+                    Isometry::RotateAround(Vector3::kUnitY, pitch) *
+                    Isometry::RotateAround(Vector3::kUnitZ, yaw));
+}
+
+
+// Operators
+Matrix3& Isometry::operator = (const Matrix3& m) {
+    translation_vector_ = Vector3();
+    rotation_matrix_ = m;
+    return rotation_matrix_;
+}
+
+Vector3 Isometry::operator * (const Vector3& v) const {
+    return Vector3(rotation_matrix_ * (v + translation_vector_));
+}
+
+Isometry Isometry::operator * (const Isometry& t) const {
+    return Isometry(translation() + t.translation(),
+                    rotation() ^ t.rotation());
+}
+
+bool Isometry::operator == (const Isometry& t) const {
+    return (rotation() == t.rotation()) && 
+           (translation() == t.translation());
+}
+
+// Misc
+
+Vector3 Isometry::transform(const Vector3& v) const {
+    return (*this) * v;
+}
+
+Isometry Isometry::compose(const Isometry& t) const {
+    Vector3 trans(get_x_translation() + t.get_x_translation(),
+                  get_y_translation() + t.get_y_translation(),
+                  get_z_translation() + t.get_z_translation());
+    
+    return Isometry(trans, rotation_matrix_ ^ t.rotation_matrix_);
+}
+
+
+// Getters
+Isometry Isometry::inverse() const {
+    return Isometry(this->translation() * -1);
+}
+
+Vector3 Isometry::translation() const {
+    return Vector3(get_x_translation(), get_y_translation(), get_z_translation());
+}
+
+Matrix3 Isometry::rotation() const {
+    return rotation_matrix_; 
+}
+
+const double Isometry::get_x_translation() const {
+    return translation_vector_[0];
+}
+
+const double Isometry::get_y_translation() const {
+    return translation_vector_[1];
+}
+
+const double Isometry::get_z_translation() const {
+    return translation_vector_[2];
+}
 
 }  // namespace math
 }  // namespace ekumen
