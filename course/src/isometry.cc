@@ -259,7 +259,7 @@ bool Matrix3::operator != (const Matrix3& m) const {
     return !(*this == m);
 }
 
-Vector3 Matrix3::operator * (const Vector3& v) {
+Vector3 Matrix3::operator * (const Vector3& v) const {
     return Vector3(r1_.dot(v), r2_.dot(v), r3_.dot(v));
 }
 
