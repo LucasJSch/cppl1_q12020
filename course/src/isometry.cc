@@ -130,11 +130,6 @@ const Vector3 Vector3::kUnitY = Vector3(0,1,0);
 const Vector3 Vector3::kUnitZ = Vector3(0,0,1);
 const Vector3 Vector3::kZero = Vector3(0,0,0);
 
-
-
-
-
-
 // Matrix3 class methods
 
 // Constructors
@@ -251,14 +246,14 @@ Matrix3& Matrix3::operator /= (const Matrix3& m) {
     return *this;
 }
 
-bool Matrix3::operator == (const Matrix3& m) {
+bool Matrix3::operator == (const Matrix3& m) const {
     if ((r1_ == m.r1_) && (r2_ == m.r2_) && (r3_ == m.r3_)) {
         return true;
     }
     return false;
 }
 
-bool Matrix3::operator != (const Matrix3& m) {
+bool Matrix3::operator != (const Matrix3& m) const {
     return !(*this == m);
 }
 
@@ -267,7 +262,7 @@ Matrix3& Matrix3::operator = (Matrix3&& m) {
     r2_ = std::move(m.r2_);
     r3_ = std::move(m.r3_);
 
-    return *this; // What about the original matrix? (m) It shouldn't have its rows available, if I'm not mistaken
+    return *this;
 }
 
 Matrix3 Matrix3::operator ^ (const Matrix3& m) const { 
@@ -310,7 +305,7 @@ const Matrix3 Matrix3::kZero = Matrix3();
 const Matrix3 Matrix3::kOnes = 
     Matrix3(Vector3(1,1,1), Vector3(1,1,1), Vector3(1,1,1));
 
-// Isometry
+// Isometry class methods
 
 Isometry Isometry::FromTranslation(const Vector3& v) {
     return Isometry(v);
@@ -355,7 +350,6 @@ Isometry Isometry::FromEulerAngles(const double roll,
                     Isometry::RotateAround(Vector3::kUnitZ, yaw));
 }
 
-
 // Operators
 Matrix3& Isometry::operator = (const Matrix3& m) {
     translation_vector_ = Vector3();
@@ -390,7 +384,6 @@ Isometry Isometry::compose(const Isometry& t) const {
     
     return Isometry(trans, rotation_matrix_ ^ t.rotation_matrix_);
 }
-
 
 // Getters
 Isometry Isometry::inverse() const {

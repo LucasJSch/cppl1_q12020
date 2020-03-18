@@ -16,6 +16,39 @@ namespace math {
 namespace test {
 namespace {
 
+
+testing::AssertionResult areAlmostEqual(const Matrix3& m1, const Matrix3& m2, const double tolerance) {
+  Matrix3 diff_matrix = m1 - m2;
+    for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      if ( abs(diff_matrix[i][j]) > tolerance ) {
+        return testing::AssertionFailure();
+      }
+    }
+  }
+  return testing::AssertionSuccess();
+}
+
+testing::AssertionResult areAlmostEqual(const Vector3& v1, const Vector3& v2, const double tolerance) {
+  Vector3 diff_vector = v1 - v2;
+  for (int i = 0; i < 3; i++) {
+    if( abs(diff_vector[i]) > tolerance ) {
+      return testing::AssertionFailure();
+    }
+  }
+  return testing::AssertionSuccess();
+}
+
+testing::AssertionResult areAlmostEqual(const Isometry& t1, const Isometry& t2, const double tolerance) {
+  // Check that translation vector is almost equal
+  testing::AssertionResult vector_assertion = areAlmostEqual(t1.translation(), t2.translation(), tolerance);
+  if (vector_assertion != testing::AssertionSuccess()) {
+    return vector_assertion;
+  }
+  // Check that rotation matrix is almost equal
+  return areAlmostEqual(t1.rotation(), t2.rotation(), tolerance);
+}
+
 GTEST_TEST(Vector3Test, Vector3Operations) {
   const double kTolerance{1e-12};
   const Vector3 p{1., 2., 3.};

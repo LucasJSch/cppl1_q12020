@@ -104,8 +104,8 @@ class Matrix3{
         Matrix3& operator -= (const Matrix3&);
         Matrix3& operator *= (const Matrix3&);
         Matrix3& operator /= (const Matrix3&);
-        bool operator == (const Matrix3&);
-        bool operator != (const Matrix3&);
+        bool operator == (const Matrix3&) const;
+        bool operator != (const Matrix3&) const;
         Vector3 operator * (const Vector3&) const;
         Matrix3& operator = (Matrix3&&);
         // Matrix product
@@ -116,10 +116,15 @@ class Matrix3{
         }
 
         friend std::ostream& operator << (std::ostream& os, const Matrix3& m) {
+            auto print_vector3 = [&](const Vector3& v) -> std::ostream& {
+                    os << "[" << v.x() << ", " << v.y() << ", " << v.z() << "]";
+                    return os;
+            };
+
             os << std::string("[");
-            for(int i = 0; i < 3; i++) {
-                os << m.row(i);
-            }
+            print_vector3(m.row(0)) << ", ";
+            print_vector3(m.row(1)) << ", ";
+            print_vector3(m.row(2)) << "]";
             return os;
         }
 
@@ -179,6 +184,7 @@ class Isometry {
         friend std::ostream& operator << (std::ostream& os, const Isometry& isometry) {
             os << std::string("[");
             os << "T: " << isometry.translation() << ", R:" << isometry.rotation();
+            os << "]";
             return os;
         }
 
