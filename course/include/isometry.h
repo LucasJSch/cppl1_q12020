@@ -106,7 +106,7 @@ class Matrix3{
         Matrix3& operator /= (const Matrix3&);
         bool operator == (const Matrix3&);
         bool operator != (const Matrix3&);
-        Vector3 operator * (const Vector3&);
+        Vector3 operator * (const Vector3&) const;
         Matrix3& operator = (Matrix3&&);
 
         friend Matrix3 operator * (const double d, const Matrix3& m) {
