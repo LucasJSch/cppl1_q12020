@@ -89,7 +89,7 @@ class Matrix3{
         Matrix3(const std::initializer_list<double>&,
                 const std::initializer_list<double>&,
                 const std::initializer_list<double>&);
-        Matrix3(Matrix3&& m) : Matrix3(m.row(0), m.row(1), m.row(2)){}
+        Matrix3(Matrix3&& m) : r1_{std::move(m.r1_)}, r2_{std::move(m.r2_)}, r3_{std::move(m.r3_)} {}
 
         // Operators
         Vector3& operator [] (const uint32_t);
@@ -127,7 +127,7 @@ class Matrix3{
         }
 
         // Getters
-        Vector3 row(uint32_t index) const;
+        const Vector3& row(uint32_t index) const;
         Vector3 col(uint32_t index) const;
 
         // Computations

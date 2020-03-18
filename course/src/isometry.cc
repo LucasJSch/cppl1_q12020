@@ -130,11 +130,6 @@ const Vector3 Vector3::kUnitY = Vector3(0,1,0);
 const Vector3 Vector3::kUnitZ = Vector3(0,0,1);
 const Vector3 Vector3::kZero = Vector3(0,0,0);
 
-
-
-
-
-
 // Matrix3 class methods
 
 // Constructors
@@ -277,7 +272,7 @@ Matrix3& Matrix3::operator = (Matrix3&& m) {
 }
 
 // Getters
-Vector3 Matrix3::row(uint32_t index) const {
+const Vector3& Matrix3::row(uint32_t index) const{
     return (*this)[index];
 }
 
