@@ -92,8 +92,8 @@ class Matrix3{
         Matrix3(Matrix3&& m) : Matrix3(m.row(0), m.row(1), m.row(2)){}
 
         // Operators
-        Vector3& operator [] (const uint8_t);
-        const Vector3& operator [] (const uint8_t) const;
+        Vector3& operator [] (const uint32_t);
+        const Vector3& operator [] (const uint32_t) const;
         Matrix3 operator + (const Matrix3&) const;
         Matrix3 operator - (const Matrix3&) const;
         Matrix3 operator * (const Matrix3&) const;
@@ -129,8 +129,8 @@ class Matrix3{
         }
 
         // Getters
-        Vector3 row(uint8_t index) const;
-        Vector3 col(uint8_t index) const;
+        Vector3 row(uint32_t index) const;
+        Vector3 col(uint32_t index) const;
 
         // Computations
         double det() const;
