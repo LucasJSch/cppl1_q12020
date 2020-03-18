@@ -104,8 +104,8 @@ class Matrix3{
         Matrix3& operator -= (const Matrix3&);
         Matrix3& operator *= (const Matrix3&);
         Matrix3& operator /= (const Matrix3&);
-        bool operator == (const Matrix3&);
-        bool operator != (const Matrix3&);
+        bool operator == (const Matrix3&) const;
+        bool operator != (const Matrix3&) const;
         Vector3 operator * (const Vector3&) const;
         Matrix3& operator = (Matrix3&&);
 

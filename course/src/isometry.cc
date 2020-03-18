@@ -253,14 +253,14 @@ Matrix3& Matrix3::operator /= (const Matrix3& m) {
     return *this;
 }
 
-bool Matrix3::operator == (const Matrix3& m) {
+bool Matrix3::operator == (const Matrix3& m) const {
     if ((r1_ == m.r1_) && (r2_ == m.r2_) && (r3_ == m.r3_)) {
         return true;
     }
     return false;
 }
 
-bool Matrix3::operator != (const Matrix3& m) {
+bool Matrix3::operator != (const Matrix3& m) const {
     return !(*this == m);
 }
 
