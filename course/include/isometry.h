@@ -77,6 +77,71 @@ class Vector3{
         double z_;
 };
 
+class Matrix3{
+    public:
+        // Constructors
+        Matrix3(const Vector3& r1 = Vector3(), 
+                const Vector3& r2 = Vector3(), const Vector3& r3 = Vector3())
+                 : r1_{r1}, r2_{r2}, r3_{r3} {};
+        Matrix3(const Matrix3& m) : Matrix3(m.row(0), m.row(1), m.row(2)) {};
+        Matrix3(const std::initializer_list<double>& list);
+        Matrix3(const std::initializer_list<double>&,
+                const std::initializer_list<double>&,
+                const std::initializer_list<double>&);
+        Matrix3(Matrix3&& m) : r1_{std::move(m.r1_)}, r2_{std::move(m.r2_)}, r3_{std::move(m.r3_)} {}
+
+        // Operators
+        Vector3& operator [] (const uint32_t);
+        const Vector3& operator [] (const uint32_t) const;
+        Matrix3 operator + (const Matrix3&) const;
+        Matrix3 operator - (const Matrix3&) const;
+        Matrix3 operator * (const Matrix3&) const;
+        Matrix3 operator * (const double) const;
+        Matrix3 operator / (const Matrix3&) const;
+        Matrix3& operator = (const Matrix3&);
+        Matrix3& operator += (const Matrix3&);
+        Matrix3& operator -= (const Matrix3&);
+        Matrix3& operator *= (const Matrix3&);
+        Matrix3& operator /= (const Matrix3&);
+        bool operator == (const Matrix3&) const;
+        bool operator != (const Matrix3&) const;
+        Vector3 operator * (const Vector3&) const;
+        Matrix3& operator = (Matrix3&&);
+
+        friend Matrix3 operator * (const double d, const Matrix3& m) {
+                return Matrix3(m.r1_ * d, m.r2_ * d, m.r3_ * d);
+        }
+
+        friend std::ostream& operator << (std::ostream& os, const Matrix3& m) {
+            auto print_vector3 = [&](const Vector3& v) -> std::ostream& {
+                    os << "[" << v.x() << ", " << v.y() << ", " << v.z() << "]";
+                    return os;
+            };
+
+            os << std::string("[");
+            print_vector3(m.row(0)) << ", ";
+            print_vector3(m.row(1)) << ", ";
+            print_vector3(m.row(2)) << "]";
+            return os;
+        }
+
+        // Getters
+        const Vector3& row(uint32_t index) const;
+        Vector3 col(uint32_t index) const;
+
+        // Computations
+        double det() const;
+
+        // Class constants
+        static const Matrix3 kIdentity;
+        static const Matrix3 kZero;
+        static const Matrix3 kOnes;
+
+    private:
+        // Ordered by rows.
+        Vector3 r1_, r2_, r3_;
+};
+
 }  // namespace math
 }  // namespace ekumen
 

@@ -129,5 +129,178 @@ const Vector3 Vector3::kUnitY = Vector3(0,1,0);
 const Vector3 Vector3::kUnitZ = Vector3(0,0,1);
 const Vector3 Vector3::kZero = Vector3(0,0,0);
 
+// Matrix3 class methods
+
+// Constructors
+Matrix3::Matrix3(const std::initializer_list<double>& list) {
+    if(list.size() != 9) {
+        throw "Invalid initializer list size";
+    }
+    std::initializer_list<double>::iterator it = list.begin();
+
+    r1_[0] = *it++;
+    r1_[1] = *it++;
+    r1_[2] = *it++;
+
+    r2_[0] = *it++;
+    r2_[1] = *it++;
+    r2_[2] = *it++;
+
+    r3_[0] = *it++;
+    r3_[1] = *it++;
+    r3_[2] = *it++;
+}
+
+Matrix3::Matrix3(const std::initializer_list<double>& l1,
+                 const std::initializer_list<double>& l2,
+                 const std::initializer_list<double>& l3) {
+    r1_ = Vector3(l1);
+    r2_ = Vector3(l2);
+    r3_ = Vector3(l3);
+}
+
+// Operators
+Vector3& Matrix3::operator [] (const uint32_t index) {
+    switch(index) {
+        case 0:
+            return r1_;
+        case 1:
+            return r2_;
+        case 2:
+            return r3_;
+        default:
+            throw "Error. Invalid row index for Matrix3";
+    }
+}
+
+const Vector3& Matrix3::operator [] (const uint32_t index) const {
+    switch(index) {
+        case 0:
+            return r1_;
+        case 1:
+            return r2_;
+        case 2:
+            return r3_;
+        default:
+            throw "Error. Invalid row index for Matrix3";
+    }
+}
+
+Matrix3 Matrix3::operator + (const Matrix3& m) const {
+    Matrix3 lhs(*this);
+    lhs += m;
+    return lhs;
+}
+
+Matrix3 Matrix3::operator - (const Matrix3& m) const {
+    Matrix3 lhs(*this);
+    lhs -= m;
+    return lhs;
+}
+
+Matrix3 Matrix3::operator * (const Matrix3& m) const {
+    Matrix3 lhs(*this);
+    lhs *= m;
+    return lhs;
+}
+
+Matrix3 Matrix3::operator * (const double d) const {
+    return Matrix3(r1_ * d, r2_ * d, r3_ * d);
+}
+
+Matrix3 Matrix3::operator / (const Matrix3& m) const {
+    return Matrix3(r1_ / m.r1_, r2_ / m.r2_, r3_ / m.r3_);
+}
+
+Matrix3& Matrix3::operator = (const Matrix3& m) {
+    r1_ = m.r1_;
+    r2_ = m.r2_;
+    r3_ = m.r3_;
+    return *this;
+}
+
+Matrix3& Matrix3::operator += (const Matrix3& m) {
+    r1_ += m.r1_;
+    r2_ += m.r2_;
+    r3_ += m.r3_;
+    return *this;
+}
+
+Matrix3& Matrix3::operator -= (const Matrix3& m) {
+    r1_ -= m.r1_;
+    r2_ -= m.r2_;
+    r3_ -= m.r3_;
+    return *this;
+}
+
+Matrix3& Matrix3::operator *= (const Matrix3& m) {
+    r1_ *= m.r1_;
+    r2_ *= m.r2_;
+    r3_ *= m.r3_;
+    return *this;
+}
+
+Matrix3& Matrix3::operator /= (const Matrix3& m) {
+    r1_ /= m.r1_;
+    r2_ /= m.r2_;
+    r3_ /= m.r3_;
+    return *this;
+}
+
+bool Matrix3::operator == (const Matrix3& m) const {
+    if ((r1_ == m.r1_) && (r2_ == m.r2_) && (r3_ == m.r3_)) {
+        return true;
+    }
+    return false;
+}
+
+bool Matrix3::operator != (const Matrix3& m) const {
+    return !(*this == m);
+}
+
+Vector3 Matrix3::operator * (const Vector3& v) const {
+    return Vector3(r1_.dot(v), r2_.dot(v), r3_.dot(v));
+}
+
+Matrix3& Matrix3::operator = (Matrix3&& m) {
+    r1_ = std::move(m.r1_);
+    r2_ = std::move(m.r2_);
+    r3_ = std::move(m.r3_);
+
+    return *this;
+}
+
+// Getters
+const Vector3& Matrix3::row(uint32_t index) const{
+    return (*this)[index];
+}
+
+Vector3 Matrix3::col(uint32_t index) const {
+    if(index > 2) {
+        throw "Error. Invalid column index for Matrix3";
+    }
+    return Vector3(r1_[index], r2_[index], r3_[index]);
+}
+
+// Computations
+double Matrix3::det() const {
+    double subdet1 = r2_[1] * r3_[2] - r2_[2] * r3_[1];
+    double subdet2 = r2_[0] * r3_[2] - r2_[2] * r3_[0];
+    double subdet3 = r2_[0] * r3_[1] - r2_[1] * r3_[0];
+
+    return r1_[0] * subdet1 - r1_[1] * subdet2 + r1_[2] * subdet3;
+}
+
+// Class constants
+const Matrix3 Matrix3::kIdentity = 
+    Matrix3(Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
+
+const Matrix3 Matrix3::kZero = 
+    Matrix3(Vector3(0, 0, 0), Vector3(0, 0, 0), Vector3(0, 0, 0));
+
+const Matrix3 Matrix3::kOnes = 
+    Matrix3(Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1));
+
+
 }  // namespace math
 }  // namespace ekumen
