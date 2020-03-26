@@ -53,6 +53,10 @@ Vector3 Vector3::operator / (const Vector3&v) const {
     return Vector3(x_ / v.x_, y_ / v.y_, z_ / v.z_);
 }
 
+Vector3 Vector3::operator / (const double& d) const {
+    return Vector3(x_ / d, y_ / d, z_ / d);
+}
+
 Vector3& Vector3::operator = (const Vector3& v) {
     x_ = v.x();
     y_ = v.y();
@@ -213,6 +217,10 @@ Matrix3 Matrix3::operator / (const Matrix3& m) const {
     return Matrix3(r1_ / m.r1_, r2_ / m.r2_, r3_ / m.r3_);
 }
 
+Matrix3 Matrix3::operator / (const double d) const {
+    return Matrix3(r1_ / d, r2_ / d, r3_ / d);
+}
+
 Matrix3& Matrix3::operator = (const Matrix3& m) {
     r1_ = m.r1_;
     r2_ = m.r2_;
@@ -302,6 +310,24 @@ double Matrix3::det() const {
     return r1_[0] * subdet1 - r1_[1] * subdet2 + r1_[2] * subdet3;
 }
 
+Matrix3 Matrix3::inverse() const {
+    Matrix3 result;
+
+    result[0][0] = r2_[1] * r3_[2] - r2_[2] * r3_[1];
+    result[0][1] = r1_[2] * r3_[2] - r1_[1] * r3_[2];
+    result[0][2] = r1_[1] * r2_[2] - r2_[1] * r1_[2];
+
+    result[1][0] = r2_[2] * r3_[0] - r2_[0] * r3_[2];
+    result[1][1] = r1_[0] * r3_[2] - r1_[2] * r3_[0];
+    result[1][2] = r1_[2] * r2_[0] - r1_[0] * r2_[2];
+
+    result[2][0] = r2_[0] * r3_[1] - r2_[1] * r3_[0];
+    result[2][1] = r1_[1] * r3_[0] - r1_[0] * r3_[1];
+    result[2][2] = r1_[0] * r2_[1] - r1_[1] * r2_[0];
+
+    return result/((*this).det());
+}
+
 // Class constants
 const Matrix3 Matrix3::kIdentity = 
     Matrix3(Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1));
@@ -318,35 +344,33 @@ Isometry Isometry::FromTranslation(const Vector3& v) {
     return Isometry(v);
 }
 
-Isometry Isometry::RotateAround(const Vector3& v, const double rotation_angle) {
+// If the axis vector is not a unit vector, the function will normalize it.
+Isometry Isometry::RotateAround(const Vector3& axis, const double rotation_angle) {
+    if (axis == Vector3()) {
+        throw "Invalid axis vector.";
+    }
 
     const double cangle{std::cos(rotation_angle)};
     const double sangle{std::sin(rotation_angle)};
 
-    Matrix3 rot_matrix;
+    // Normalized axis.
+    Vector3 norm_axis = axis/axis.norm();
+    // Axis with squared values.
+    Vector3 sq_axis = norm_axis * norm_axis;
 
-    if (v == Vector3::kUnitX) {
-        rot_matrix = Matrix3(Vector3::kUnitX,
-                             Vector3(0, cangle, -sangle),
-                             Vector3(0, sangle, cangle));
-    }
-    else if (v == Vector3::kUnitY) {
-        rot_matrix = Matrix3(Vector3(cangle, 0, sangle),
-                             Vector3::kUnitY,
-                             Vector3(-sangle, 0, cangle));
-    }
-    else if (v == Vector3::kUnitZ) {
-        rot_matrix = Matrix3(Vector3(cangle, -sangle, 0),
-                             Vector3(sangle, cangle, 0),
-                             Vector3::kUnitZ);
-    }
-    else {
-        throw "Invalid rotation axis";
-    }
+    Matrix3 rot_matrix = {cangle + sq_axis.x() * (1 - cangle),
+                          norm_axis.x() * norm_axis.y() * (1 - cangle) - norm_axis.z() * sangle,
+                          norm_axis.x() * norm_axis.z() * (1 - cangle) + norm_axis.y() * sangle,
+
+                          norm_axis.y() * norm_axis.x() * (1 - cangle) + norm_axis.z() * sangle,
+                          cangle + sq_axis.y() * (1 - cangle),
+                          norm_axis.y() * norm_axis.z() * (1 - cangle) - norm_axis.x() * sangle,
+
+                          norm_axis.z() * norm_axis.x() * (1 - cangle) - norm_axis.y() * sangle,
+                          norm_axis.z() * norm_axis.y() * (1 - cangle) + norm_axis.x() * sangle,
+                          cangle + sq_axis.z() * (1 - cangle)};
 
     return Isometry(Vector3(), rot_matrix);
-
-
 }
 
 Isometry Isometry::FromEulerAngles(const double roll, 
@@ -365,11 +389,11 @@ Matrix3& Isometry::operator = (const Matrix3& m) {
 }
 
 Vector3 Isometry::operator * (const Vector3& v) const {
-    return Vector3(rotation_matrix_ * (v + translation_vector_));
+    return Vector3((rotation_matrix_ * v) + translation_vector_);
 }
 
 Isometry Isometry::operator * (const Isometry& t) const {
-    return Isometry(translation() + t.translation(),
+    return Isometry((rotation() * t.translation()) + translation(),
                     rotation() ^ t.rotation());
 }
 
@@ -385,36 +409,21 @@ Vector3 Isometry::transform(const Vector3& v) const {
 }
 
 Isometry Isometry::compose(const Isometry& t) const {
-    Vector3 trans(get_x_translation() + t.get_x_translation(),
-                  get_y_translation() + t.get_y_translation(),
-                  get_z_translation() + t.get_z_translation());
-    
-    return Isometry(trans, rotation_matrix_ ^ t.rotation_matrix_);
+    return (*this) * t;
 }
 
 // Getters
 Isometry Isometry::inverse() const {
-    return Isometry(this->translation() * -1);
+    return Isometry{(rotation_matrix_.inverse() * translation_vector_) * -1,
+                    rotation_matrix_.inverse()};
 }
 
-Vector3 Isometry::translation() const {
-    return Vector3(get_x_translation(), get_y_translation(), get_z_translation());
+const Vector3& Isometry::translation() const {
+    return translation_vector_;
 }
 
-Matrix3 Isometry::rotation() const {
+const Matrix3& Isometry::rotation() const {
     return rotation_matrix_; 
-}
-
-const double Isometry::get_x_translation() const {
-    return translation_vector_[0];
-}
-
-const double Isometry::get_y_translation() const {
-    return translation_vector_[1];
-}
-
-const double Isometry::get_z_translation() const {
-    return translation_vector_[2];
 }
 
 }  // namespace math
