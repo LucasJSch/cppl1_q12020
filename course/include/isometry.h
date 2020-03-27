@@ -169,7 +169,7 @@ class Isometry {
                                         const double yaw);
 
         // Operators
-        Matrix3& operator = (const Matrix3&);
+        Isometry& operator = (const Matrix3&);
         Vector3 operator * (const Vector3&) const;
         Isometry operator * (const Isometry&) const;
         bool operator == (const Isometry&) const;

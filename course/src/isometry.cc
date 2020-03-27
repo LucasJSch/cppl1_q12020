@@ -382,14 +382,14 @@ Isometry Isometry::FromEulerAngles(const double roll,
 }
 
 // Operators
-Matrix3& Isometry::operator = (const Matrix3& m) {
+Isometry& Isometry::operator = (const Matrix3& m) {
     translation_vector_ = Vector3();
     rotation_matrix_ = m;
-    return rotation_matrix_;
+    return *this;
 }
 
 Vector3 Isometry::operator * (const Vector3& v) const {
-    return Vector3((rotation_matrix_ * v) + translation_vector_);
+    return (rotation_matrix_ * v) + translation_vector_;
 }
 
 Isometry Isometry::operator * (const Isometry& t) const {
